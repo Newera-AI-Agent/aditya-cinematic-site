@@ -108,18 +108,6 @@ h1 { margin: 0; color: var(--sun); font-size: var(--title); line-height: .82; fo
     return { p, rise, orbit, converge, quiet, spin: p * TAU * .85, glow: lerp(.6, 1.35, rise) + converge * .4, haze: lerp(.2, .78, orbit) * (1 - quiet * .3), scale: lerp(.72, 1.1, rise) + converge * .12, cameraX: (state.pointerX * .035) + Math.sin(p*TAU) * .018, cameraY: (state.pointerY * .025) - rise * .04 };
   };
   const setPointer = (x,y) => { state.pointerX = clamp(x * 2 - 1, -1, 1); state.pointerY = clamp(y * 2 - 1, -1, 1); };
-  addEventListener('scroll', updateScroll, { passive: true });
-  addEventListener('pointermove', e => { if (e.pointerType !== 'touch') setPointer(e.clientX / innerWidth, e.clientY / innerHeight); }, { passive: true });
-  addEventListener('pointerdown', e => { if (e.pointerType === 'touch') { state.touchX=e.clientX; state.touchY=e.clientY; } }, { passive: true });
-  addEventListener('pointermove', e => { if (e.pointerType === 'touch') { state.touchX = lerp(state.touchX,e.clientX,.12); state.touchY = lerp(state.touchY,e.clientY,.12); setPointer(e.clientX/innerWidth,e.clientY/innerHeight); } }, { passive: true });
-  addEventListener('resize', resize, { passive: true });
-  addEventListener('orientationchange', resize, { passive: true });
-  document.addEventListener('visibilitychange', () => { state.paused = document.hidden; if (!state.paused) { state.last = performance.now(); requestAnimationFrame(frame); } });
-  control.addEventListener('click', () => { state.muted = !state.muted; control.setAttribute('aria-pressed', String(state.muted)); });
-  const motionQuery = matchMedia ? matchMedia('(prefers-reduced-motion: reduce)') : null;
-  const syncMotion = () => { state.reduced = !!motionQuery?.matches; if (state.reduced) state.quality = .55; };
-  motionQuery?.addEventListener?.('change', syncMotion); syncMotion();
-
   /* ================================================================
      7. RENDERING BACKENDS
      ================================================================ */
@@ -154,3 +142,73 @@ h1 { margin: 0; color: var(--sun); font-size: var(--title); line-height: .82; fo
     for(let i=0;i<18;i++){ const a=i*TAU/18, spread=.012+.012*s.orbit; c.strokeStyle=color(i%3===0?palette.sun:palette.ember,.035*s.haze); c.lineWidth=1+2*s.converge; c.beginPath(); c.moveTo(Math.cos(a)*radius*.1,Math.sin(a)*radius*.1); c.lineTo(Math.cos(a+spread)*radius,Math.sin(a+spread)*radius); c.stroke(); }
     c.restore();
   }
+  function silhouette(s) {
+    const c=ctx2,w=state.width,h=state.height,cx=w*.5+s.cameraX*w*.12,cy=h*.5+s.cameraY*h*.08;
+    const radius=Math.min(w,h)*.16*s.scale;
+    c.save(); c.translate(cx,cy); c.rotate(s.spin*.045); c.globalCompositeOperation='lighter';
+    const halo=c.createRadialGradient(0,0,0,0,0,radius*2.2);
+    halo.addColorStop(0,color(palette.sun,.18*s.converge+.045)); halo.addColorStop(.32,color(palette.ember,.08*s.glow)); halo.addColorStop(1,color(palette.ember,0));
+    c.fillStyle=halo; c.beginPath(); c.arc(0,0,radius*2.2,0,TAU); c.fill();
+    c.strokeStyle=color(palette.sun,.16+.28*s.converge); c.lineWidth=1.2; c.beginPath(); c.arc(0,0,radius,0,TAU); c.stroke();
+    c.strokeStyle=color(palette.ember,.22+.25*s.orbit); c.lineWidth=1; c.beginPath(); c.arc(0,0,radius*1.28,.3,Math.PI*1.78); c.stroke();
+    c.fillStyle=color(palette.sun,.11+.16*s.converge); c.beginPath(); c.arc(0,0,radius*.34,0,TAU); c.fill();
+    c.strokeStyle=color(palette.sun,.34+.3*s.converge); c.lineWidth=1;
+    for(let i=0;i<8;i++){ const a=i*TAU/8+s.spin*.23; c.beginPath(); c.moveTo(Math.cos(a)*radius*.42,Math.sin(a)*radius*.42); c.lineTo(Math.cos(a)*radius*1.55,Math.sin(a)*radius*1.55); c.stroke(); }
+    c.restore();
+  }
+  function render2D(s) {
+    if(!ctx2 || state.width<1 || state.height<1) return;
+    backdrop(s); rays(s); particles(particleStore.back,s,.48); rings(s); particles(particleStore.mid,s,.78); silhouette(s); particles(particleStore.front,s,.92); particles(particleStore.sparks,s,1.15);
+  }
+  function updateDOM(s) {
+    progressLine.style.height=(s.p*100).toFixed(2)+'%';
+    const titleScale=1 + s.converge*.035 - s.quiet*.02;
+    const titleY=(s.rise*.55-s.quiet*.18)*state.height*.018;
+    title.style.transform=`translate3d(${(s.cameraX*8).toFixed(2)}px,${titleY.toFixed(2)}px,0) scale(${titleScale.toFixed(3)})`;
+    title.style.opacity=String(.82 + s.converge*.18);
+    document.documentElement.style.setProperty('--bloom',String(s.glow));
+  }
+  function frame(now) {
+    if(state.paused) return;
+    const dt=Math.min(.05,Math.max(.001,(now-state.last||now)/1000)); state.last=now; state.frame++;
+    state.progress += (state.targetProgress-state.progress) * (state.reduced ? .22 : .1);
+    const s=sceneState();
+    if(ctx2) render2D(s);
+    else if(gl) { gl.viewport(0,0,canvas.width,canvas.height); gl.clearColor(.027,.027,.043,1); gl.clear(gl.COLOR_BUFFER_BIT); }
+    updateDOM(s);
+    state.fpsTime+=dt; state.fpsFrames++;
+    if(state.fpsTime>1){ const fps=state.fpsFrames/state.fpsTime; if(fps<30) state.quality=Math.max(.34,state.quality*.82); else if(fps>52 && state.quality<1 && !state.reduced) state.quality=Math.min(1,state.quality+.06); state.fpsTime=0; state.fpsFrames=0; }
+    requestAnimationFrame(frame);
+  }
+  function resize() {
+    state.width=Math.max(1,innerWidth); state.height=Math.max(1,innerHeight);
+    state.dpr=Math.min(MAX_DPR,Math.max(1,devicePixelRatio||1));
+    const cap=2200000, pixels=state.width*state.height*state.dpr*state.dpr;
+    if(pixels>cap) state.dpr*=Math.sqrt(cap/pixels);
+    canvas.width=Math.max(1,Math.floor(state.width*state.dpr)); canvas.height=Math.max(1,Math.floor(state.height*state.dpr));
+    canvas.style.width=state.width+'px'; canvas.style.height=state.height+'px';
+    if(ctx2) ctx2.setTransform(state.dpr,0,0,state.dpr,0,0);
+  }
+  /* ================================================================
+     8. ANIMATION LOOP / 9. CAPABILITY AND MOTION HANDLING
+     ================================================================ */
+  updateScroll();
+  resize();
+  if(!ctx2 && !gl) document.documentElement.classList.add('no-canvas');
+  if(!ctx2) document.documentElement.classList.add('css-fallback');
+  addEventListener('scroll', updateScroll, { passive:true });
+  addEventListener('resize', resize, { passive:true });
+  addEventListener('orientationchange', resize, { passive:true });
+  const motion=window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+  const syncMotion=()=>{ state.reduced=!!motion?.matches; if(state.reduced) state.quality=.45; };
+  syncMotion(); motion?.addEventListener?.('change',syncMotion);
+  document.addEventListener('visibilitychange',()=>{ state.paused=document.hidden; if(!state.paused){state.last=performance.now();requestAnimationFrame(frame);} });
+  control.addEventListener('click',()=>{ state.muted=!state.muted; control.setAttribute('aria-pressed',String(state.muted)); if(state.muted) state.quality=.35; else if(!state.reduced) state.quality=Math.max(state.quality,.72); });
+  /* ================================================================
+     10. INITIALIZATION
+     ================================================================ */
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
