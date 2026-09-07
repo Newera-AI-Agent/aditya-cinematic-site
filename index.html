@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Aditya</title>
+<meta name="theme-color" content="#07070b">
+<style>
+/* ================================================================
+   1. DOCUMENT SHELL / 2. CSS TOKENS AND LAYOUT
+   ================================================================ */
+:root {
+  --ink: #07070b;
+  --night: #10101a;
+  --wine: #2b1323;
+  --ember: #da6d3b;
+  --sun: #ffd38a;
+  --moon: #b8c9db;
+  --line: rgba(255,211,138,.3);
+  --title: clamp(3.2rem, 18vw, 11rem);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+* { box-sizing: border-box; }
+html { background: var(--ink); color: var(--sun); overflow-x: hidden; }
+body { margin: 0; min-width: 320px; background: var(--ink); font-family: Georgia, 'Times New Roman', serif; overflow-x: hidden; }
+main { position: relative; min-height: 520vh; isolation: isolate; }
+#stage { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: -3; background: var(--ink); }
+.atmosphere { position: fixed; inset: 0; z-index: -2; pointer-events: none; background:
+  radial-gradient(ellipse at 50% 48%, rgba(112,41,47,.26), transparent 45%),
+  radial-gradient(ellipse at 50% 110%, rgba(218,109,59,.11), transparent 49%);
+  mix-blend-mode: screen; }
+.vignette { position: fixed; inset: 0; z-index: 4; pointer-events: none; background: radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,.38) 100%); }
+.fallback-visual { position: fixed; z-index: -1; inset: 8% 12%; border: 1px solid var(--line); border-radius: 50%; opacity: .22; transform: rotate(-24deg) scaleY(.52); box-shadow: 0 0 90px rgba(218,109,59,.24), inset 0 0 90px rgba(255,211,138,.1); pointer-events: none; }
+.fallback-visual::before, .fallback-visual::after { content: ''; position: absolute; inset: 12%; border: 1px solid rgba(184,201,219,.35); border-radius: 50%; }
+.fallback-visual::after { inset: 26%; border-color: rgba(218,109,59,.4); }
+.hero { position: fixed; inset: 0; display: grid; place-items: center; padding: calc(24px + var(--safe-top)) 20px calc(24px + var(--safe-bottom)); pointer-events: none; z-index: 2; }
+.title-wrap { position: relative; display: grid; place-items: center; transform: translateZ(0); }
+h1 { margin: 0; color: var(--sun); font-size: var(--title); line-height: .82; font-weight: 400; letter-spacing: -.08em; text-shadow: 0 0 18px rgba(255,211,138,.58), 0 0 70px rgba(218,109,59,.55); }
+.title-halo { position: absolute; width: 68vw; height: 68vw; max-width: 430px; max-height: 430px; border-radius: 50%; background: radial-gradient(circle, rgba(255,211,138,.15), rgba(218,109,59,.07) 35%, transparent 68%); filter: blur(11px); z-index: -1; }
+.progress-rail { position: fixed; top: calc(28px + var(--safe-top)); right: 18px; width: 1px; height: min(34vh, 240px); background: rgba(255,211,138,.22); z-index: 5; }
+.progress-line { width: 100%; height: 18%; transform-origin: top; background: var(--sun); box-shadow: 0 0 12px var(--sun); }
+.orbit-control { position: fixed; right: 13px; bottom: calc(24px + var(--safe-bottom)); width: 48px; height: 48px; border: 1px solid rgba(255,211,138,.55); border-radius: 50%; background: rgba(7,7,11,.24); z-index: 6; cursor: pointer; padding: 0; }
+.orbit-control::before { content: ''; position: absolute; inset: 13px; border: 1px solid var(--sun); border-radius: 50%; }
+.orbit-control::after { content: ''; position: absolute; left: 21px; top: 8px; width: 5px; height: 5px; border-radius: 50%; background: var(--sun); box-shadow: 0 0 7px var(--sun); }
+.orbit-control:focus-visible { outline: 2px solid var(--sun); outline-offset: 4px; }
+.spacer { height: 100vh; }
+@media (min-width: 700px) { .hero { padding-inline: 8vw; } .progress-rail { right: 32px; } .orbit-control { right: 28px; } }
+@media (prefers-reduced-motion: reduce) { .title-halo { filter: blur(16px); } .fallback-visual { transform: rotate(-24deg) scaleY(.52); } }
+</style>
+</head>
+<body>
+<main id="experience" aria-labelledby="name">
+  <canvas id="stage" role="img" aria-label="A cinematic atmospheric visual for Aditya"></canvas>
+  <div class="fallback-visual" aria-hidden="true"></div>
+  <div class="atmosphere" aria-hidden="true"></div>
+  <div class="vignette" aria-hidden="true"></div>
+  <section class="hero" aria-label="Aditya">
+    <div class="title-wrap"><div class="title-halo" aria-hidden="true"></div><h1 id="name">Aditya</h1></div>
+  </section>
+  <div class="progress-rail" aria-hidden="true"><div class="progress-line" id="progressLine"></div></div>
+  <button class="orbit-control" id="orbitControl" type="button" aria-label="Toggle ambient motion" aria-pressed="false"></button>
+  <div class="spacer" aria-hidden="true"></div><div class="spacer" aria-hidden="true"></div><div class="spacer" aria-hidden="true"></div><div class="spacer" aria-hidden="true"></div><div class="spacer" aria-hidden="true"></div>
+</main>
+<script>
+/* ================================================================
+   3. RENDERER CONSTANTS / 4. SEEDED PROCEDURAL GENERATION
+   ================================================================ */
+(() => {
+  'use strict';
+  const canvas = document.getElementById('stage');
+  const ctx2 = canvas.getContext('2d', { alpha: false, desynchronized: true });
+  const gl = !ctx2 ? (canvas.getContext('webgl', { alpha: false, antialias: false }) || canvas.getContext('experimental-webgl')) : null;
+  const title = document.getElementById('name');
+  const progressLine = document.getElementById('progressLine');
+  const control = document.getElementById('orbitControl');
+  const TAU = Math.PI * 2;
+  const MAX_DPR = 1.8;
+  const palette = { ink: [7,7,11], wine: [48,18,35], ember: [218,109,59], sun: [255,211,138], moon: [184,201,219] };
+  const state = { progress: 0, targetProgress: 0, width: 1, height: 1, dpr: 1, reduced: false, paused: false, muted: false, quality: 1, pointerX: 0, pointerY: 0, touchX: 0, touchY: 0, last: 0, fpsTime: 0, fpsFrames: 0, frame: 0 };
+  const particleStore = { back: [], mid: [], front: [], sparks: [] };
+  let seed = 0x9e3779b9;
+  const rand = () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed / 4294967296; };
+  const makeParticles = (count, depth, spread, speed) => Array.from({ length: count }, () => ({
+    x: rand() * 2 - 1, y: rand() * 2 - 1, z: .08 + rand() * .92, r: .35 + rand() * 1.7, a: .18 + rand() * .72, phase: rand() * TAU, speed: speed * (.35 + rand() * .9), depth, spread
+  }));
+  for (let i = 0; i < 620; i++) particleStore.back.push(makeParticles(1, .15, 1.3, .12)[0]);
+  for (let i = 0; i < 300; i++) particleStore.mid.push(makeParticles(1, .45, .9, .22)[0]);
+  for (let i = 0; i < 110; i++) particleStore.front.push(makeParticles(1, .85, .62, .3)[0]);
+  for (let i = 0; i < 80; i++) particleStore.sparks.push(makeParticles(1, 1, .32, .5)[0]);
+
+  /* ================================================================
+     5. INPUT STATE / 6. SCENE INTERPOLATION
+     ================================================================ */
+  const clamp = (v, a=0, b=1) => Math.max(a, Math.min(b, v));
+  const smooth = v => v * v * (3 - 2 * v);
+  const lerp = (a,b,t) => a + (b-a)*t;
+  const updateScroll = () => {
+    const max = Math.max(1, document.documentElement.scrollHeight - innerHeight);
+    state.targetProgress = clamp(scrollY / max);
+  };
+  const sceneState = () => {
+    const p = state.progress;
+    const rise = smooth(clamp(p / .24));
+    const orbit = smooth(clamp((p - .16) / .34));
+    const converge = smooth(clamp((p - .48) / .31));
+    const quiet = smooth(clamp((p - .79) / .21));
+    return { p, rise, orbit, converge, quiet, spin: p * TAU * .85, glow: lerp(.6, 1.35, rise) + converge * .4, haze: lerp(.2, .78, orbit) * (1 - quiet * .3), scale: lerp(.72, 1.1, rise) + converge * .12, cameraX: (state.pointerX * .035) + Math.sin(p*TAU) * .018, cameraY: (state.pointerY * .025) - rise * .04 };
+  };
+  const setPointer = (x,y) => { state.pointerX = clamp(x * 2 - 1, -1, 1); state.pointerY = clamp(y * 2 - 1, -1, 1); };
+  addEventListener('scroll', updateScroll, { passive: true });
+  addEventListener('pointermove', e => { if (e.pointerType !== 'touch') setPointer(e.clientX / innerWidth, e.clientY / innerHeight); }, { passive: true });
+  addEventListener('pointerdown', e => { if (e.pointerType === 'touch') { state.touchX=e.clientX; state.touchY=e.clientY; } }, { passive: true });
+  addEventListener('pointermove', e => { if (e.pointerType === 'touch') { state.touchX = lerp(state.touchX,e.clientX,.12); state.touchY = lerp(state.touchY,e.clientY,.12); setPointer(e.clientX/innerWidth,e.clientY/innerHeight); } }, { passive: true });
+  addEventListener('resize', resize, { passive: true });
+  addEventListener('orientationchange', resize, { passive: true });
+  document.addEventListener('visibilitychange', () => { state.paused = document.hidden; if (!state.paused) { state.last = performance.now(); requestAnimationFrame(frame); } });
+  control.addEventListener('click', () => { state.muted = !state.muted; control.setAttribute('aria-pressed', String(state.muted)); });
+  const motionQuery = matchMedia ? matchMedia('(prefers-reduced-motion: reduce)') : null;
+  const syncMotion = () => { state.reduced = !!motionQuery?.matches; if (state.reduced) state.quality = .55; };
+  motionQuery?.addEventListener?.('change', syncMotion); syncMotion();
+
+  /* ================================================================
+     7. RENDERING BACKENDS
+     ================================================================ */
+  function resize() {
+    state.width = Math.max(1, innerWidth); state.height = Math.max(1, innerHeight);
+    state.dpr = Math.min(MAX_DPR, Math.max(1, devicePixelRatio || 1));
+    const cap = 2200000; const pixels = state.width * state.height * state.dpr * state.dpr;
+    if (pixels > cap) state.dpr *= Math.sqrt(cap / pixels);
+    canvas.width = Math.max(1, Math.floor(state.width * state.dpr)); canvas.height = Math.max(1, Math.floor(state.height * state.dpr));
+    canvas.style.width = state.width + 'px'; canvas.style.height = state.height + 'px';
+    if (ctx2) ctx2.setTransform(state.dpr,0,0,state.dpr,0,0);
+  }
+  function color(c,a=1) { return `rgba(${c[0]},${c[1]},${c[2]},${a})`; }
+  function backdrop(s) {
+    const w=state.width,h=state.height, c=ctx2; c.fillStyle=color(palette.ink); c.fillRect(0,0,w,h);
+    const g=c.createRadialGradient(w*.5,h*(.48+s.cameraY),0,w*.5,h*.48,Math.max(w,h)*.72); g.addColorStop(0,color(palette.wine,.32*s.glow)); g.addColorStop(.42,color(palette.ember,.1*s.haze)); g.addColorStop(1,color(palette.ink,0)); c.fillStyle=g; c.fillRect(0,0,w,h);
+    const sun=c.createRadialGradient(w*.5,h*.48,0,w*.5,h*.48,Math.min(w,h)*.46); sun.addColorStop(0,color(palette.sun,.045*s.glow)); sun.addColorStop(1,color(palette.sun,0)); c.fillStyle=sun; c.fillRect(0,0,w,h);
+  }
+  function particles(list,s,alpha=1) {
+    const c=ctx2,w=state.width,h=state.height, count=Math.floor(list.length*state.quality); c.save(); c.globalCompositeOperation='lighter';
+    for(let i=0;i<count;i++){ const q=list[i], drift=state.reduced?0:Math.sin(s.p*TAU*q.speed+q.phase)*.018; const x=w*(.5+q.x*q.spread*.62 + s.cameraX*q.depth + drift*q.depth); const y=h*(.5+q.y*q.spread*.9 + s.cameraY*q.depth); const r=q.r*(q.depth*1.5+.5)*(w/390); const a=q.a*alpha*(.38+.62*s.glow); c.fillStyle=color(q.depth>.7?palette.sun:palette.moon,a); c.beginPath(); c.arc(x,y,Math.max(.35,r),0,TAU); c.fill(); }
+    c.restore();
+  }
+  function rings(s) {
+    const c=ctx2,w=state.width,h=state.height, cx=w*.5+s.cameraX*w*.1,cy=h*.5+s.cameraY*h*.08, base=Math.min(w,h)*.24*s.scale;
+    c.save(); c.translate(cx,cy); c.rotate(s.spin*.18); c.globalCompositeOperation='lighter';
+    for(let i=0;i<5;i++){ const r=base*(.62+i*.23); c.strokeStyle=color(i%2?palette.moon:palette.ember,(.12+i*.018)*s.orbit + .08*s.converge); c.lineWidth=1+(i===2?1:0); c.beginPath(); c.ellipse(0,0,r,r*(.26+.12*s.orbit),i*.34+s.spin,0,TAU); c.stroke(); }
+    c.restore();
+  }
+  function rays(s) {
+    const c=ctx2,w=state.width,h=state.height,cx=w*.5,cy=h*.5, radius=Math.max(w,h)*.75; c.save(); c.translate(cx,cy); c.rotate(s.spin*.09); c.globalCompositeOperation='lighter';
+    for(let i=0;i<18;i++){ const a=i*TAU/18, spread=.012+.012*s.orbit; c.strokeStyle=color(i%3===0?palette.sun:palette.ember,.035*s.haze); c.lineWidth=1+2*s.converge; c.beginPath(); c.moveTo(Math.cos(a)*radius*.1,Math.sin(a)*radius*.1); c.lineTo(Math.cos(a+spread)*radius,Math.sin(a+spread)*radius); c.stroke(); }
+    c.restore();
+  }
