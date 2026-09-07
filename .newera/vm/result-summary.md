@@ -1,0 +1,3 @@
+# VM agent result
+
+Built the Aditya cinematic 3D scroll experience entirely in index.html. It is phone-first with only Aditya as visible page text, normalized reversible scene interpolation, procedural WebGL-first rendering with Canvas 2D and CSS fallbacks, seeded bounded particles, atmospheric mythical geometry and lighting, responsive safe-area layout, touch-safe pointer interaction, reduced-motion support, adaptive quality, bounded DPR, hidden-tab throttling, semantic accessibility, and a single animation scheduler. Final verification passed: static structure and node syntax, local HTTP serving, and direct Chromium browser rendering at 390×844 with a PNG artifact. Permanent deployment was confirmed for aditya.newera.page.dev.
