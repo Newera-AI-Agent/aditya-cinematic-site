@@ -199,8 +199,11 @@ h1 { margin: 0; color: var(--sun); font-size: var(--title); line-height: .82; fo
     const dt=Math.min(.05,Math.max(.001,(now-state.last||now)/1000)); state.last=now; state.frame++;
     state.progress += (state.targetProgress-state.progress) * (state.reduced ? .22 : .1);
     const s=sceneState();
-    if(ctx2) render2D(s);
-    else if(gl) { gl.viewport(0,0,canvas.width,canvas.height); gl.clearColor(.027,.027,.043,1); gl.clear(gl.COLOR_BUFFER_BIT); }
+    if (gl) {
+      if (!renderWebGL(s, now) && ctx2) render2D(s);
+    } else if (ctx2) {
+      render2D(s);
+    }
     updateDOM(s);
     state.fpsTime+=dt; state.fpsFrames++;
     if(state.fpsTime>1){ const fps=state.fpsFrames/state.fpsTime; if(fps<30) state.quality=Math.max(.34,state.quality*.82); else if(fps>52 && state.quality<1 && !state.reduced) state.quality=Math.min(1,state.quality+.06); state.fpsTime=0; state.fpsFrames=0; }

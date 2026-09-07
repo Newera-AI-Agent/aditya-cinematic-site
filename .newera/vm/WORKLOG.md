@@ -32,3 +32,12 @@ Durable session memory for this VM job chain. Each line is one step or wind-down
 - [2026-09-07T02:45:20.853Z | VM 1/3] step 26 edit_file ok [tools so far: 26]: patched index.html (1 occurrence(s) replaced)
 - [2026-09-07T02:45:27.159Z | VM 1/3] step 27 shell ok [tools so far: 27]: 66	/* ================================================================     67	   3. RENDERER CONSTANTS / 4. SEEDED PROCEDURAL GENERATION     68	   =====================================================
 - [2026-09-07T02:45:39.067Z | VM 1/3] step 28 edit_file ok [tools so far: 28]: patched index.html (1 occurrence(s) replaced)
+- [2026-09-07T02:45:45.789Z | VM 1/3] step 29 shell ok [tools so far: 29]: 155	    const halo=c.createRadialGradient(0,0,0,0,0,radius*2.2);    156	    halo.addColorStop(0,color(palette.sun,.18*s.converge+.045)); halo.addColorStop(.32,color(palette.ember,.08*s.glow)); halo.ad
+- [2026-09-07T02:45:53.168Z | VM 1/3] step 30 edit_file ok [tools so far: 30]: patched index.html (1 occurrence(s) replaced)
+- [2026-09-07T02:46:01.510Z | VM 1/3] step 31 shell FAILED [tools so far: 31]: Traceback (most recent call last):   File "<stdin>", line 4, in <module> AttributeError: 'NoneType' object has no attribute 'group' [exit 1]
+- [2026-09-07T02:46:12.346Z | VM 1/3] step 32 shell ok [tools so far: 32]: /tmp/aditya-phone.png: PNG image data, 390 x 844, 8-bit/color RGB, non-interlaced
+- [2026-09-07T02:46:23.829Z | VM 1/3] step 33 shell FAILED [tools so far: 33]: Traceback (most recent call last):   File "<stdin>", line 7, in <module>   File "/usr/lib/python3.12/re/__init__.py", line 177, in search     return _compile(pattern, flags).search(string)            
+- [2026-09-07T02:46:30.237Z | VM 1/3] step 34 shell ok [tools so far: 34]: script chars 13888 visible text candidates ['Aditya', 'Toggle ambient motion', 'cinematic atmospheric visual'] --- fixed scans --- script tags: 1 raf calls: 3 index files: 1
+- [2026-09-07T02:46:42.105Z | VM 1/3] step 35 shell ok [tools so far: 35]: browser smoke: DOM loaded, title present, named control present node syntax: PASS browser console fatal scan: PASS
+- [2026-09-07T02:46:51.076Z | VM 1/3] PLAN updated: 5 steps
+- [2026-09-07T02:46:51.076Z | VM 1/3] step 36 todo ok [tools so far: 36]: Plan recorded (5 steps): ## CURRENT PLAN (5 steps) 1. [x] Create phone-first single-file Aditya 3D scroll experience with strict visible-copy constr (req REQ-001) 2. [x] Implement cinematic 3D-style s
