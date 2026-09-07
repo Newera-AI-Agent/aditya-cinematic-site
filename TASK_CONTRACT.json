@@ -1,0 +1,67 @@
+{
+  "originalRequest": "you have to make a 3d scroll website for boy ADITYA in index.html, my expectations are so high, it must be phone first ui, no other text than just name Aditya, he is my friend of age 16 (do not mention anyhting). it should give so much high vibes, cenamatic like 3d views. my expectations with you is really so high, i am expecting you give me best beautiful, eye catching, mind blowing, mythical effect, work on full efforts, that eye catching experience that i want to give to my friend, i am expecting more than 6000 lines of best code of life. you can self generate iamges or that, or do anything, spark your creativity yourslef like adding some legenday effects using tens of thousands of particles and much more. Make using vm, keep repo puclic , and subdomain is aditya",
+  "normalizedInterpretation": "you have to make a 3d scroll website for boy ADITYA in index.html, my expectations are so high, it must be phone first ui, no other text than just name Aditya, he is my friend of age 16 (do not mention anyhting).; it should give so much high vibes, cenamatic like 3d views.; my expectations with you is really so high, i am expecting you give me best beautiful, eye catching, mind blowing, mythical effect, work on full efforts, that eye catching experience that i want to give to my friend, i am expecting more than 6000 lines of best code of life.; you can self generate iamges or that, or do anything, spark your creativity yourslef like adding some legenday effects using tens of thousands of particles and much more.; Make using vm, keep repo puclic , and subdomain is aditya",
+  "assumptions": [],
+  "profile": "marathon",
+  "requirements": [
+    {
+      "id": "REQ-001",
+      "description": "you have to make a 3d scroll website for boy ADITYA in index.html, my expectations are so high, it must be phone first ui, no other text than just name Aditya, he is my friend of age 16 (do not mention anyhting).",
+      "mandatory": true,
+      "status": "pending",
+      "evidenceType": "custom",
+      "acceptanceCriteria": "Concrete implementation evidence is recorded and the outcome matches the user request."
+    },
+    {
+      "id": "REQ-002",
+      "description": "it should give so much high vibes, cenamatic like 3d views.",
+      "mandatory": true,
+      "status": "pending",
+      "evidenceType": "custom",
+      "acceptanceCriteria": "Concrete implementation evidence is recorded and the outcome matches the user request."
+    },
+    {
+      "id": "REQ-003",
+      "description": "my expectations with you is really so high, i am expecting you give me best beautiful, eye catching, mind blowing, mythical effect, work on full efforts, that eye catching experience that i want to give to my friend, i am expecting more than 6000 lines of best code of life.",
+      "mandatory": true,
+      "status": "pending",
+      "evidenceType": "custom",
+      "acceptanceCriteria": "Concrete implementation evidence is recorded and the outcome matches the user request."
+    },
+    {
+      "id": "REQ-004",
+      "description": "you can self generate iamges or that, or do anything, spark your creativity yourslef like adding some legenday effects using tens of thousands of particles and much more.",
+      "mandatory": true,
+      "status": "pending",
+      "evidenceType": "custom",
+      "acceptanceCriteria": "Concrete implementation evidence is recorded and the outcome matches the user request."
+    },
+    {
+      "id": "REQ-005",
+      "description": "Make using vm, keep repo puclic , and subdomain is aditya",
+      "mandatory": true,
+      "status": "pending",
+      "evidenceType": "custom",
+      "acceptanceCriteria": "Concrete implementation evidence is recorded and the outcome matches the user request."
+    }
+  ],
+  "featureMatrix": [
+    "you have to make a 3d scroll website for boy ADITYA in index.html, my expectations are so high, it must be phone first ui, no other text than just name Aditya, he is my friend of age 16 (do not mention anyhting).",
+    "it should give so much high vibes, cenamatic like 3d views.",
+    "my expectations with you is really so high, i am expecting you give me best beautiful, eye catching, mind blowing, mythical effect, work on full efforts, that eye catching experience that i want to give to my friend, i am expecting more than 6000 lines of best code of life.",
+    "you can self generate iamges or that, or do anything, spark your creativity yourslef like adding some legenday effects using tens of thousands of particles and much more.",
+    "Make using vm, keep repo puclic , and subdomain is aditya"
+  ],
+  "contentMatrix": [],
+  "assetManifest": [],
+  "audioManifest": [],
+  "testMatrix": [],
+  "artifactMatrix": [],
+  "platformRequirements": [
+    "Web"
+  ],
+  "permissions": [],
+  "deferredItems": [],
+  "createdAt": 1788748809867,
+  "updatedAt": 1788748809872
+}
